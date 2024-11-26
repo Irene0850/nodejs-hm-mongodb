@@ -1,4 +1,4 @@
-import mangoose from 'mangoose';
+import mongoose from 'mongoose';
 
 import dotenv from 'dotenv';
 dotenv.config();
@@ -9,7 +9,7 @@ const mongoURI = `mongodb+srv://${MONGODB_USER}:${MONGODB_PASSWORD}@${MONGODB_UR
 
 export const initMongoConnection = async () => {
   try {
-    await mangoose.connect(mongoURI);
+    await mongoose.connect(mongoURI);
     console.log('MONGO CONNECTION SUCCESSFULLY ESTABLISHED!');
   } catch (error) {
     console.error('MONGO CONNECTION FAILED:', error.message);
