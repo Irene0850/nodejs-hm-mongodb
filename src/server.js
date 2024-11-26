@@ -1,19 +1,18 @@
 import express from 'express';
-import pino from 'pino';
-import { pinoHttp } from 'pino-http';
+
 import cors from 'cors';
 import { allContacts, getContact } from './controllers/contacts.js';
-
-const logger = pino();
-
-const pinoMiddleware = pinoHttp({ logger });
+import { pinoHttp } from 'pino-http';
+import pino from 'pino';
 
 export const setupServer = () => {
   const app = express();
 
+  const logger = pino();
+
   app.use(express.json());
   app.use(cors());
-  app.use(pinoMiddleware());
+  app.use(pinoHttp({ logger }));
 
   app.get('/contacts/:contactId', getContact);
   app.get('/contacts', allContacts);
@@ -22,5 +21,6 @@ export const setupServer = () => {
     res.status(404).json({ message: 'NOT FOUND' });
   });
   console.log('SERVER SETUP COMPLETE');
+
   return app;
 };

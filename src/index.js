@@ -10,6 +10,7 @@ const startServer = async () => {
     console.log('Initializing MongoDB connection...');
     await initMongoConnection();
     console.log('MongoDB connected:)');
+
     const app = setupServer();
 
     const PORT = process.env.PORT || 3001;
