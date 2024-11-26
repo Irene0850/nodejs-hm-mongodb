@@ -12,7 +12,7 @@ const startServer = async () => {
     console.log('MongoDB connected:)');
     const app = setupServer();
 
-    const PORT = process.env.PORT || 8080;
+    const PORT = process.env.PORT || 3001;
     app.listen(PORT, () => {
       console.log(`SERVER IS RUNNING ON PORT ${PORT}`);
     });
