@@ -1,26 +1,29 @@
 import express from 'express';
 
 import cors from 'cors';
-import { allContacts, getContact } from './controllers/contacts.js';
 import { pinoHttp } from 'pino-http';
 import pino from 'pino';
+import { notFoundHandler } from './middlewares/notFoundHandler.js';
+import { errorHandler } from './middlewares/errorHandler.js';
+import contactsRouter from './routers/contacts.js';
 
 export const setupServer = () => {
   const app = express();
 
   const logger = pino();
 
-  app.use(express.json());
+  app.use(
+    express.json({
+      type: ['application/json', 'application/vnd.api+json'],
+      limit: '1mb',
+    }),
+  );
   app.use(cors());
   app.use(pinoHttp({ logger }));
 
-  app.get('/contacts/:contactId', getContact);
-  app.get('/contacts', allContacts);
-
-  app.use((req, res, next) => {
-    res.status(404).json({ message: 'NOT FOUND' });
-  });
-  console.log('SERVER SETUP COMPLETE');
+  app.use('/contacts', contactsRouter);
+  app.use('*', notFoundHandler);
+  app.use(errorHandler);
 
   return app;
 };
