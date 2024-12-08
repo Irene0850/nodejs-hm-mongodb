@@ -33,6 +33,7 @@ export const updateContactById = async (contactId, updateData) => {
   try {
     return Contact.findByIdAndUpdate(contactId, updateData, { new: true });
   } catch (error) {
+    console.error('Error updating contact:', error);
     throw new Error('Error updating contact in database');
   }
 };
@@ -41,6 +42,7 @@ export const deleteContactById = async (contactId) => {
   try {
     return Contact.findByIdAndDelete(contactId);
   } catch (error) {
+    console.error('Error deleting contact:', error);
     throw new Error('Error deleting contact fron database');
   }
 };
