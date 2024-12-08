@@ -25,6 +25,7 @@ export const createContact = async (contactData) => {
     const newContact = new Contact(contactData);
     return newContact.save();
   } catch (error) {
+    console.error('Error saving new contact:', error);
     throw new Error('Error saving contact to database');
   }
 };
