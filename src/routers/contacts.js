@@ -15,7 +15,7 @@ import {
   createContactSchema,
   updateContactSchema,
 } from '../validation/contactValidation.js';
-import { isValidId } from '../middlewares/isValidid.js';
+import { isValidId } from '../middlewares/isValidId.js';
 
 const router = Router();
 
