@@ -1,23 +1,50 @@
+import { SORT_ORDER } from '../contacts/index.js';
 import Contact from '../models/contact.js';
+import { calculatePaginationData } from '../utils/calculatePaginationData.js';
 
 export const getContactById = async (contactId) => {
   try {
     const contact = await Contact.findById(contactId);
     return contact;
   } catch (error) {
-    console.log('Error finding contact be ID:', error);
+    console.error('Error finding contact be ID:', error);
     throw error;
   }
 };
 
-export const getAllContacts = async () => {
-  try {
-    const contacts = await Contact.find();
-    return contacts;
-  } catch (error) {
-    console.error('Error retrieving contacts:', error);
-    throw error;
+export const getAllContacts = async ({
+  page = 1,
+  perPage = 10,
+  sortOrder = SORT_ORDER.ASC,
+  sortBy = '_id',
+  filter = {},
+}) => {
+  const limit = perPage;
+  const skip = page > 0 ? (page - 1) * perPage : 0;
+
+  const contactQuery = Contact.find();
+
+  if (typeof filter.type !== 'undefined') {
+    contactQuery.where('contactType').equals(filter.type);
   }
+  if (typeof filter.isFavourite !== 'undefined') {
+    contactQuery.where('isFavourite').equals(filter.isFavourite);
+  }
+
+  const [contactaCount, contacts] = await Promise.all([
+    Contact.find().merge(contactQuery).countDocuments(),
+    contactQuery
+      .skip(skip)
+      .limit(limit)
+      .sort({ [sortBy]: sortOrder })
+      .exec(),
+  ]);
+
+  const paginationData = calculatePaginationData(contactaCount, perPage, page);
+  return {
+    data: contacts,
+    ...paginationData,
+  };
 };
 
 export const createContact = async (contactData) => {
@@ -44,6 +71,6 @@ export const deleteContactById = async (contactId) => {
     return Contact.findByIdAndDelete(contactId);
   } catch (error) {
     console.error('Error deleting contact:', error);
-    throw new Error('Error deleting contact fron database');
+    throw new Error('Error deleting contact from database');
   }
 };

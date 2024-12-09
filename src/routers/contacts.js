@@ -10,11 +10,12 @@ import {
 
 import { ctrlWrapper } from '../utils/ctrlWrapper.js';
 import { validateBody } from '../middlewares/validateBody.js';
-import { isValidId } from '../middlewares/isValidid.js';
+
 import {
   createContactSchema,
   updateContactSchema,
 } from '../validation/contactValidation.js';
+import { isValidId } from '../middlewares/isValidid.js';
 
 const router = Router();
 
