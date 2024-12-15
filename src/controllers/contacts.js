@@ -68,7 +68,7 @@ export const allContacts = async (req, res, next) => {
       status: 200,
       message: 'Successfully found contacts!',
       data: {
-        contacts: data,
+        data,
         page,
         perPage,
         totalItems,
@@ -85,7 +85,6 @@ export const allContacts = async (req, res, next) => {
 export const createContactController = async (req, res, next) => {
   try {
     const newContact = await createContact(req.body);
-
     const contactWithoutVersion = newContact.toObject();
     delete contactWithoutVersion._v;
 
@@ -105,6 +104,7 @@ export const updateContactController = async (req, res, next) => {
 
   try {
     const updateContact = await updateContactById(contactId, updateData);
+
     if (!updateContact) {
       throw createHttpError(404, 'Contact not found');
     }
@@ -115,7 +115,8 @@ export const updateContactController = async (req, res, next) => {
       data: updateContact,
     });
   } catch (error) {
-    next(error);
+    console.error('Error updating contact:', error);
+    next(createHttpError(500, 'Internal Server Error'));
   }
 };
 
