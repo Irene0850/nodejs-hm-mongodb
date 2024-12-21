@@ -4,6 +4,7 @@ import createHttpError from 'http-errors';
 import { Session } from '../models/Session.js';
 import { FIFTEEN_MINUTES, THIRTY_DAYS } from '../contacts/index.js';
 import { randomBytes } from 'crypto';
+import jwt from 'jsonwebtoken';
 
 export const registerUser = async (payload) => {
   const user = await UsersCollection.findOne({
@@ -28,8 +29,14 @@ export const loginUser = async (email, password) => {
 
   await Session.deleteOne({ userId: user._id });
 
-  const accessToken = randomBytes(15).toString('base64');
-  const refreshToken = randomBytes(30).toString('base64');
+  const accessToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+    expiresIn: '15m',
+  });
+  const refreshToken = jwt.sign(
+    { userId: user._id },
+    process.env.JWT_REFRESH_SECRET,
+    { expiresIn: '30d' },
+  );
 
   const session = await Session.create({
     userId: user._id,
