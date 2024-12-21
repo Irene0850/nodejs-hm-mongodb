@@ -1,10 +1,11 @@
 import { Router } from 'express';
+import express from 'express';
 
 import {
-  allContacts,
   createContactController,
   deleteContactController,
   getContact,
+  getContactsController,
   updateContactController,
 } from '../controllers/contacts.js';
 
@@ -16,26 +17,40 @@ import {
   updateContactSchema,
 } from '../validation/contactValidation.js';
 import { isValidId } from '../middlewares/isValidId.js';
+import { authorization } from '../middlewares/authorization.js';
 
 const router = Router();
 
-router.get('/', ctrlWrapper(allContacts));
+const jsonParser = express.json();
 
-router.get('/:contactId', isValidId, ctrlWrapper(getContact));
+router.use(authorization);
+
+router.get('/', ctrlWrapper(getContactsController));
+
+router.get('/:contactId', authorization, isValidId, ctrlWrapper(getContact));
 
 router.post(
   '/',
+  authorization,
+  jsonParser,
   validateBody(createContactSchema),
   ctrlWrapper(createContactController),
 );
 
 router.patch(
   '/:contactId',
+  authorization,
   isValidId,
+  jsonParser,
   validateBody(updateContactSchema),
   ctrlWrapper(updateContactController),
 );
 
-router.delete('/:contactId', isValidId, ctrlWrapper(deleteContactController));
+router.delete(
+  '/:contactId',
+  authorization,
+  isValidId,
+  ctrlWrapper(deleteContactController),
+);
 
 export default router;
