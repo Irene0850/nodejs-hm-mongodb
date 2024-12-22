@@ -3,7 +3,7 @@ import Joi from 'joi';
 export const registerUserSchema = Joi.object({
   name: Joi.string()
     .min(3)
-    .max(20)
+    .max(30)
     .regex(/^[a-zA-Z\s]+$/)
     .required(),
   email: Joi.string().email().required(),

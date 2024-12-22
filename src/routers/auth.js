@@ -14,7 +14,7 @@ const router = Router();
 const jsonParser = express.json();
 
 router.post(
-  './register',
+  '/register',
   jsonParser,
   validateBody(registerUserSchema),
   ctrlWrapper(registerUserController),

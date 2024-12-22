@@ -1,22 +1,34 @@
 import bcrypt from 'bcrypt';
-import { UsersCollection } from '../models/User.js';
+import { UsersCollection } from '../db/models/user.js';
 import createHttpError from 'http-errors';
-import { Session } from '../models/Session.js';
+import { Session } from '../db/models/session.js';
 import { FIFTEEN_MINUTES, THIRTY_DAYS } from '../contacts/index.js';
 import { randomBytes } from 'crypto';
 import jwt from 'jsonwebtoken';
 
 export const registerUser = async (payload) => {
-  const user = await UsersCollection.findOne({
-    email: payload.email,
-  });
+  try {
+    const user = await UsersCollection.findOne({ email: payload.email });
 
-  if (user !== null) {
-    throw createHttpError(409, 'Email already in use');
+    console.log(user);
+
+    if (user) {
+      throw createHttpError(409, 'Email already in use');
+    }
+
+    if (payload.password) {
+      payload.password = await bcrypt.hash(payload.password, 10);
+    } else {
+      throw createHttpError(400, 'Password is required');
+    }
+
+    const newUser = await UsersCollection.create(payload);
+
+    return newUser;
+  } catch (error) {
+    console.log(error);
+    throw createHttpError(500, 'Failed to register user', { cause: error });
   }
-  payload.password = await bcrypt.hash(payload.password, 10);
-
-  return UsersCollection.create(payload);
 };
 
 export const loginUser = async (email, password) => {

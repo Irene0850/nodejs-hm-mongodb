@@ -5,7 +5,7 @@ import {
   refreshUserSession,
   registerUser,
 } from '../services/auth.js';
-import { UsersCollection } from '../models/User.js';
+import { UsersCollection } from '../db/models/user.js';
 import bcrypt from 'bcryptjs';
 
 export const registerUserController = async (req, res, next) => {

@@ -1,14 +1,13 @@
 import createHttpError from 'http-errors';
-import { Session } from '../models/Session.js';
-import { UsersCollection } from '../models/User.js';
+import { Session } from '../db/models/session.js';
+import { UsersCollection } from '../db/models/user.js';
 
 export const authorization = async (req, res, next) => {
   try {
     const authHeader = req.get('Authorization');
 
     if (!authHeader) {
-      next(createHttpError(401, 'Please provide Authorization header'));
-      return;
+      return next(createHttpError(401, 'Please provide Authorization header'));
     }
     const [bearer, token] = authHeader.split(' ');
 
@@ -35,6 +34,10 @@ export const authorization = async (req, res, next) => {
 
     if (!user) {
       return next(createHttpError(401));
+    }
+
+    if (!user.isActive) {
+      return next(createHttpError(403, 'User is not active'));
     }
 
     req.user = user;
