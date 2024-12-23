@@ -106,14 +106,12 @@ export const refreshUserSessionController = async (req, res, next) => {
 
     res.cookie('refreshToken', session.refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       expires: session.refreshTokenValidUntil,
     });
 
     res.cookie('sessionId', session._id, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       expires: session.refreshTokenValidUntil,
     });

@@ -17,21 +17,21 @@ import {
   updateContactSchema,
 } from '../validation/contactValidation.js';
 import { isValidId } from '../middlewares/isValidId.js';
-import { authorization } from '../middlewares/authorization.js';
+import { authenticate } from '../middlewares/authenticate.js';
 
 const router = Router();
 
 const jsonParser = express.json();
 
-router.use(authorization);
+router.use(authenticate);
 
 router.get('/', ctrlWrapper(getContactsController));
 
-router.get('/:contactId', authorization, isValidId, ctrlWrapper(getContact));
+router.get('/:contactId', authenticate, isValidId, ctrlWrapper(getContact));
 
 router.post(
   '/',
-  authorization,
+  authenticate,
   jsonParser,
   validateBody(createContactSchema),
   ctrlWrapper(createContactController),
@@ -39,7 +39,7 @@ router.post(
 
 router.patch(
   '/:contactId',
-  authorization,
+  authenticate,
   isValidId,
   jsonParser,
   validateBody(updateContactSchema),
@@ -48,7 +48,7 @@ router.patch(
 
 router.delete(
   '/:contactId',
-  authorization,
+  authenticate,
   isValidId,
   ctrlWrapper(deleteContactController),
 );
