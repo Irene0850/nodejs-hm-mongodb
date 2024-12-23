@@ -5,79 +5,42 @@ import {
   refreshUserSession,
   registerUser,
 } from '../services/auth.js';
-import { UsersCollection } from '../db/models/user.js';
-import bcrypt from 'bcryptjs';
 
 export const registerUserController = async (req, res, next) => {
-  try {
-    const existingUser = await UsersCollection.findOne({
-      email: req.body.email,
-    });
+  const payload = {
+    name: req.body.name,
+    email: req.body.email,
+    password: req.body.password,
+  };
 
-    if (existingUser) {
-      return res.status(400).json({
-        status: 400,
-        message: 'User already exists with this email',
-      });
-    }
+  const user = await registerUser(payload);
 
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
-
-    const payload = {
-      name: req.body.name,
-      email: req.body.email,
-      password: hashedPassword,
-    };
-
-    const user = await registerUser(payload);
-
-    res.status(201).json({
-      status: 201,
-      message: 'Successfully registered a user!',
-      data: user,
-    });
-  } catch (err) {
-    console.log(err);
-    next(err);
-  }
+  res.status(201).json({
+    status: 201,
+    message: 'Successfully registered a user!',
+    data: user,
+  });
 };
 
-export const loginUserController = async (req, res, next) => {
-  try {
-    const { email, password } = req.body;
+export const loginUserController = async (req, res) => {
+  const { email, password } = req.body;
+  const session = await loginUser(email, password);
 
-    if (!email || !password) {
-      return res.status(400).json({
-        status: 400,
-        message: 'Email and password are required',
-      });
-    }
+  res.cookie('refreshToken', session.refreshToken, {
+    httpOnly: true,
+    expires: session.refreshTokenValidUntil,
+  });
 
-    const session = await loginUser(email, password);
+  res.cookie('sessionId', session._id, {
+    httpOnly: true,
+    expires: session.refreshTokenValidUntil,
+  });
 
-    if (!session) {
-      return res.status(401).json({
-        status: 401,
-        message: 'Invalid email or password',
-      });
-    }
-
-    res.cookie('refreshToken', session.refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      expires: session.refreshTokenValidUntil,
-    });
-
-    res.status(200).json({
-      status: 200,
-      message: 'Successfully logged in an user!',
-      data: { accessToken: session.accessToken },
-    });
-  } catch (error) {
-    console.log(error);
-    next(error);
-  }
+  res.status(200).json({
+    status: 200,
+    message: 'Successfully logged in an user!',
+    data: { accessToken: session.accessToken },
+  });
 };
 
 export const logoutUserController = async (req, res, next) => {
