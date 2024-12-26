@@ -4,6 +4,7 @@ import createHttpError from 'http-errors';
 import { Session } from '../db/models/session.js';
 import { FIFTEEN_MINUTES, THIRTY_DAYS } from '../contacts/index.js';
 import { randomBytes } from 'crypto';
+import jwt from 'jsonwebtoken';
 
 export const registerUser = async (payload) => {
   try {
@@ -91,4 +92,16 @@ export const refreshUserSession = async ({ sessionId, refreshToken }) => {
     userId: session.userId,
     ...newAccessSession,
   });
+};
+
+export const requestResetToken = async (email) => {
+  const user = await UsersCollection.findOne({ email });
+  if (!user) throw createHttpError(404, 'Used not found');
+
+  const resetToken = jwt.sign({ sub: user._id, email }, env('JWT_SECRET'), {
+    expiresIn: '15m',
+  });
+
+  const templatePath = path.join(TEMPLATES_DIR, 'reset-password-email.html');
+  const 
 };
