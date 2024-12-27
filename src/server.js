@@ -8,6 +8,7 @@ import { errorHandler } from './middlewares/errorHandler.js';
 import contactsRouter from './routers/contacts.js';
 import cookieParser from 'cookie-parser';
 import authRouter from './routers/auth.js';
+import router from './routers/index.js';
 
 export const setupServer = () => {
   const app = express();
@@ -27,16 +28,16 @@ export const setupServer = () => {
   app.use('/auth', authRouter);
   app.use('/contacts', contactsRouter);
 
+  app.use(router);
   app.use('*', notFoundHandler);
   app.use(errorHandler);
 
   return app;
 };
 
-export const startServer = (port = 3000) => {
-  const app = setupServer();
+export const startServer = () => {
+  const app = express();
 
-  app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-  });
+  app.use(express.json());
+  app.use(cors());
 };
