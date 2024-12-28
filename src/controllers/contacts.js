@@ -1,35 +1,94 @@
-import { getAllContacts, getContactById } from '../services/contacts.js';
+import {
+  createContact,
+  deleteContactById,
+  getAllContacts,
+  getContactsById,
+  updateContactById,
+} from '../services/contacts.js';
+
+import createHttpError from 'http-errors';
+import { parseFilterParams } from '../utils/parseFilterParams.js';
+import { parsePaginationParams } from '../utils/parsePaginationParams.js';
+import { parseSortParams } from '../utils/parseSortParams.js';
+
+export const getContactsController = async (req, res) => {
+  const { page, perPage } = parsePaginationParams(req.query);
+  const { sortOrder, sortBy } = parseSortParams(req.query);
+  const filter = parseFilterParams(req.query);
+
+  const contacts = await getAllContacts({
+    page,
+    perPage,
+    sortOrder,
+    sortBy,
+    filter,
+    userId: req.user._id,
+  });
+
+  res.json({
+    status: 200,
+    message: 'Successfully found contacts!',
+    data: contacts,
+  });
+};
 
 export const getContact = async (req, res) => {
   const { contactId } = req.params;
+  const userId = req.user._id;
 
-  try {
-    const contact = await getContactById(contactId);
-    if (!contact) {
-      return res.status(404).json({ message: 'Contact not found' });
-    }
-    res.status(200).json({
-      status: 200,
-      message: `Successfully found contact with id ${contactId}`,
-      data: contact,
-    });
-  } catch (error) {
-    console.error('Error retrieving contact:', error);
-    res.status(500).json({ message: 'Internal server error' });
+  const contact = await getContactsById(contactId, userId);
+
+  if (!contact) {
+    throw createHttpError(404, 'Contact not found');
   }
+
+  res.json({
+    status: 200,
+    message: `Successfully found contact with id ${contactId}`,
+    data: contact,
+  });
 };
 
-export const allContacts = async (req, res) => {
-  try {
-    const contact = await getAllContacts();
+export const createContactController = async (req, res) => {
+  const contact = {
+    ...req.body,
+    userId: req.user._id,
+  };
+  const createdContact = await createContact(contact);
 
-    res.status(200).json({
-      status: 200,
-      message: 'Successfully retrieved all contacts!',
-      data: contact,
-    });
-  } catch (error) {
-    console.error('Error retrieving contact:', error);
-    res.status(500).json({ message: 'Internal server error' });
+  res.status(201).json({
+    status: 201,
+    message: `Successfully created contact for ${req.user.name}!`,
+    data: createdContact,
+  });
+};
+
+export const patchContactController = async (req, res, next) => {
+  const { contactId } = req.params;
+  const userId = req.user._id;
+  const updateData = req.body;
+
+  const contact = await updateContactById(contactId, updateData, userId);
+
+  if (contact === null) {
+    throw createHttpError(404, 'Contact not found');
   }
+
+  res.status(200).json({
+    status: 200,
+    message: `Successfully updated the contact for ${req.user.name}!`,
+    data: contact,
+  });
+};
+
+export const deleteContactController = async (req, res, next) => {
+  const { contactId } = req.params;
+  const userId = req.user._id;
+
+  const contact = await deleteContactById(contactId, userId);
+
+  if (!contact) {
+    throw createHttpError(404, 'Contact not found!');
+  }
+  res.status(204).end();
 };
