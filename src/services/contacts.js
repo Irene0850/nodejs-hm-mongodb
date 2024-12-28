@@ -43,19 +43,10 @@ export const getAllContacts = async ({
       .exec(),
   ]);
 
-  const formattedContacts = contacts.map((contact) => ({
-    _id: contact._id,
-    name: contact.name,
-    email: contact.email,
-    phone: contact.phone,
-    contactType: contact.contactType,
-    isFavourite: contact.isFavourite,
-  }));
-
   const paginationData = calculatePaginationData(contactCount, perPage, page);
 
   return {
-    data: formattedContacts,
+    data: contacts,
     ...paginationData,
   };
 };
