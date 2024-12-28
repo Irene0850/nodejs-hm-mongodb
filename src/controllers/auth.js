@@ -1,4 +1,3 @@
-import createHttpError from 'http-errors';
 import {
   loginUser,
   logoutUser,
@@ -6,6 +5,7 @@ import {
   registerUser,
   requestResetToken,
 } from '../services/auth.js';
+import { THIRTY_DAYS } from '../contacts/index.js';
 
 export const registerUserController = async (req, res, next) => {
   const payload = {
@@ -45,49 +45,41 @@ export const loginUserController = async (req, res) => {
 };
 
 export const logoutUserController = async (req, res, next) => {
-  try {
-    if (req.cookies.sessionId) {
-      await logoutUser(req.cookies.sessionId);
-    }
-
-    res.clearCookie('sessionId');
-    res.clearCookie('refreshToken');
-    res.status(204).send();
-  } catch (error) {
-    next(error);
+  if (req.cookies.sessionId) {
+    await logoutUser(req.cookies.sessionId);
   }
+
+  res.clearCookie('sessionId');
+  res.clearCookie('refreshToken');
+
+  res.status(204).send();
 };
 
-export const refreshUserSessionController = async (req, res, next) => {
-  try {
-    const { sessionId, refreshToken } = req.cookies;
+const setupUserSession = (res, session) => {
+  res.cookie('refreshToken', session.refreshToken, {
+    httpOnly: true,
+    expires: new Date(Date.now() + THIRTY_DAYS),
+  });
 
-    if (!sessionId || !refreshToken) {
-      throw createHttpError(400, 'Missing session or refresh token');
-    }
+  res.cookie('sessionId', session._id, {
+    httpOnly: true,
+    expires: new Date(Date.now() + THIRTY_DAYS),
+  });
+};
 
-    const session = await refreshUserSession({ sessionId, refreshToken });
+export const refreshUserSessionController = async (req, res) => {
+  const session = await refreshUserSession({
+    sessionId: req.cookies.sessionId,
+    refreshToken: req.cookies.refreshToken,
+  });
 
-    res.cookie('refreshToken', session.refreshToken, {
-      httpOnly: true,
-      sameSite: 'strict',
-      expires: session.refreshTokenValidUntil,
-    });
+  setupUserSession(res, session);
 
-    res.cookie('sessionId', session._id, {
-      httpOnly: true,
-      sameSite: 'strict',
-      expires: session.refreshTokenValidUntil,
-    });
-
-    res.status(200).json({
-      status: 200,
-      message: 'Successfully refreshed a session!',
-      data: { accessToken: session.accessToken },
-    });
-  } catch (error) {
-    next(error);
-  }
+  res.status(200).json({
+    status: 200,
+    message: 'Successfully refreshed a session!',
+    data: { accessToken: session.accessToken },
+  });
 };
 
 export const requestResetEmailController = async (req, res) => {

@@ -6,7 +6,7 @@ import {
   deleteContactController,
   getContact,
   getContactsController,
-  updateContactController,
+  patchContactController,
 } from '../controllers/contacts.js';
 
 import { ctrlWrapper } from '../utils/ctrlWrapper.js';
@@ -27,7 +27,12 @@ router.use(authenticate);
 
 router.get('/', ctrlWrapper(getContactsController));
 
-router.get('/:contactId', authenticate, isValidId, ctrlWrapper(getContact));
+router.get(
+  '/:contactId',
+  authenticate,
+  isValidId('contactId'),
+  ctrlWrapper(getContact),
+);
 
 router.post(
   '/',
@@ -40,16 +45,16 @@ router.post(
 router.patch(
   '/:contactId',
   authenticate,
-  isValidId,
+  isValidId('contactId'),
   jsonParser,
   validateBody(updateContactSchema),
-  ctrlWrapper(updateContactController),
+  ctrlWrapper(patchContactController),
 );
 
 router.delete(
   '/:contactId',
   authenticate,
-  isValidId,
+  isValidId('contactId'),
   ctrlWrapper(deleteContactController),
 );
 
