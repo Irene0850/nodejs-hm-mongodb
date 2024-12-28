@@ -4,6 +4,7 @@ import {
   refreshUserSession,
   registerUser,
   requestResetToken,
+  resetPassword,
 } from '../services/auth.js';
 import { THIRTY_DAYS } from '../contacts/index.js';
 
@@ -95,6 +96,23 @@ export const requestResetEmailController = async (req, res) => {
       status: 500,
       message: 'Failed to send reset password email',
       error: error.message,
+    });
+  }
+};
+
+export const resetPasswordConrtoller = async (req, res) => {
+  try {
+    await resetPassword(req.body);
+    res.json({
+      status: 200,
+      message: 'Password has been successfully reset',
+      data: {},
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: 500,
+      message: 'Failed te reset password',
+      error: err.message,
     });
   }
 };
