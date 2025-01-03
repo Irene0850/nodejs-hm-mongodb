@@ -1,7 +1,6 @@
 import { CLOUDINARY } from '../contacts/index.js';
 import { env } from './env.js';
 import cloudinary from 'cloudinary';
-import * as fs from 'node:fs/promises';
 
 cloudinary.v2.config({
   secure: true,
@@ -12,6 +11,5 @@ cloudinary.v2.config({
 
 export const saveFileToCloudinary = async (file) => {
   const response = await cloudinary.v2.uploader.upload(file.path);
-  await fs.unlink(file.path);
   return response.secure_url;
 };
