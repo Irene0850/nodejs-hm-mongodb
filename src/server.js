@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser';
 import router from './routers/index.js';
 import { env } from './utils/env.js';
 import { ENV_VARS, UPLOAD_DIR } from './contacts/index.js';
+import { swaggerDocs } from './middlewares/swaggerDocs.js';
 
 const PORT = Number(env(ENV_VARS.PORT, '3001'));
 
