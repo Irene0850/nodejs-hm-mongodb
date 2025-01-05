@@ -21,6 +21,7 @@ export const setupServer = () => {
   );
   app.use(cors());
   app.use(cookieParser());
+
   app.use(
     pino({
       transport: {
@@ -28,6 +29,12 @@ export const setupServer = () => {
       },
     }),
   );
+
+  app.get('/', (req, res) => {
+    res.json({
+      message: 'Привіт :)',
+    });
+  });
 
   app.use(router);
   app.use('*', notFoundHandler);
