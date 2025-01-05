@@ -1,26 +1,47 @@
 import express from 'express';
-
 import cors from 'cors';
-import { allContacts, getContact } from './controllers/contacts.js';
-import { pinoHttp } from 'pino-http';
-import pino from 'pino';
+import pino from 'pino-http';
+import { notFoundHandler } from './middlewares/notFoundHandler.js';
+import { errorHandler } from './middlewares/errorHandler.js';
+import cookieParser from 'cookie-parser';
+import router from './routers/index.js';
+import { env } from './utils/env.js';
+import { ENV_VARS, UPLOAD_DIR } from './contacts/index.js';
+
+const PORT = Number(env(ENV_VARS.PORT, '3001'));
 
 export const setupServer = () => {
   const app = express();
 
-  const logger = pino();
-
-  app.use(express.json());
+  app.use(
+    express.json({
+      type: ['application/json', 'application/vnd.api+json'],
+      limit: '1mb',
+    }),
+  );
   app.use(cors());
-  app.use(pinoHttp({ logger }));
+  app.use(cookieParser());
 
-  app.get('/contacts/:contactId', getContact);
-  app.get('/contacts', allContacts);
+  app.use(
+    pino({
+      transport: {
+        target: 'pino-pretty',
+      },
+    }),
+  );
 
-  app.use((req, res, next) => {
-    res.status(404).json({ message: 'NOT FOUND' });
+  app.get('/', (req, res) => {
+    res.json({
+      message: 'Привіт :)',
+    });
   });
-  console.log('SERVER SETUP COMPLETE');
 
-  return app;
+  app.use(router);
+  app.use('*', notFoundHandler);
+  app.use(errorHandler);
+  app.use('/uploads', express.static(UPLOAD_DIR));
+
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
 };
