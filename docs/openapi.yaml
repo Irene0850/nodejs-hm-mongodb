@@ -7,15 +7,17 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   description:
     This is a documentation of contacts app
+
 tags:
- - name: Contacts
-   description: Operations about contacts.
+- name: Contacts
+description: Operations about contacts.
 - name: Auth
 description: Auth operations.
+
 servers:
   - url: http://localhost:3000
   - url: https://nodejs-hm-mongodb-10.onrender.com
-  
+
 paths:
   /contacts/{contactId}:
     get:
