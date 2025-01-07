@@ -16,7 +16,8 @@ content:
           example: UnauthorizedError
         data:
           type: object
-          required: -message
+          required:
+            - message
           properties:
             message:
               type: string
